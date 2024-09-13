@@ -27,7 +27,6 @@ Logs/6workers.csv
 Logs/7workers.csv
 Logs/wandb_export_2024-09-12T18_51_48.064+02_00.csv
 Logs/wandb_export_2024-09-12T19_21_56.585+02_00.csv
-Params/Parameters_1.py
 Params/__pycache__/Parameters_1.cpython-310.pyc
 wandb/run-20240912_180018-eqr8sw0m/run-eqr8sw0m.wandb
 wandb/run-20240912_180018-eqr8sw0m/files/config.yaml
