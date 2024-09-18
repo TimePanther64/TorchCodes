@@ -10,13 +10,13 @@ config = config_dict.ConfigDict()
 #* Training Configuration
 config.train = config_dict.ConfigDict()
 config.train.num_runs = 1
-config.train.model = Model.resnet18
+config.train.model = Model.lenet5
 config.train.loss_fn = torch.nn.NLLLoss # torch.nn.CrossEntropyLoss
 
 #* Data Configuration
 config.data = config_dict.ConfigDict()
-config.data.name = 'cifar10'
-config.data.alloc_type = 'dirichlet'
+config.data.name = 'mnist'
+config.data.alloc_type = 'uniform'
 config.data.alloc_ratio = 2
 config.data.beta = 0.5
 config.data.batch_size = 128
@@ -32,8 +32,7 @@ config.beta.index = 0
 
 #*Server Configuration 
 config.server = config_dict.ConfigDict()
-
-config.server.num_epochs = 200
+config.server.num_epochs = 20
 config.server.update_thresh = 0.75
 config.server.es = config_dict.ConfigDict()
 config.server.es.enable = False
@@ -47,10 +46,10 @@ config.server.tx.lr = 0.1
 
 #*Worker Configuration
 config.worker = config_dict.ConfigDict()
-config.worker.num = 16
+config.worker.num = 50
 config.worker.inact_prob = 0
-config.worker.k = [4, 5, 6, 7, 8]
-config.worker.beta_list = [0.2, 0.4, 0.6, 0.8, 1.0]
+config.worker.k = [5, 10, 15, 20]
+config.worker.beta_list = [0.1, 0.5, 1.0]
 
 config.worker.epoch = config_dict.ConfigDict()
 config.worker.epoch.type = 'constant'
@@ -68,6 +67,12 @@ config.worker.tx.lr_decay_per_server_epoch = 1.0
 config.worker.tx.type_decay_per_server_epoch = 'Geometric'
 config.worker.tx.lr_decay_per_worker_epoch = 1.0
 config.worker.tx.type_decay_per_worker_epoch = 'Geometric'
+
+config.diagnostic = config_dict.ConfigDict()
+config.diagnostic.q = 1.5
+config.diagnostic.k0 = 5
+config.diagnostic.thresh = 0.1
+config.diagnostic.step = 5
 
 #* Compressor Configuration
 config.compressor = config_dict.ConfigDict()
@@ -97,7 +102,6 @@ config.compressor.w2s.rescale = False
 config.compressor.w2s.k = None #! TBD in Code
 config.compressor.w2s.prob = 0.0 #! TBD in Code
 config.compressor.w2s.send_grad_diff = True
-
 
 # #*Distilllation Configuration
 # config.distillation = config_dict.ConfigDict()

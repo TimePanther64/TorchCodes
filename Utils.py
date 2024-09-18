@@ -26,8 +26,8 @@ def download_data(name_dataset:str, dir_dataset: str) -> tuple[npt.NDArray[np.in
     testset = dataset_downloader(dir_dataset, train = False, download=True)
     train_data, train_targets = np.array(trainset.data), np.array(trainset.targets)
     test_data, test_targets = np.array(testset.data), np.array(testset.targets)
-    print(f"The range of train data and test data are {np.ptp(train_data)}, {np.ptp(test_data)}.")
-    print(f"The data types of train data and test data are {train_data.dtype}, {test_data.dtype}")
+    # print(f"The range of train data and test data are {np.ptp(train_data)}, {np.ptp(test_data)}.")
+    # print(f"The data types of train data and test data are {train_data.dtype}, {test_data.dtype}")
     train_data = np.expand_dims(train_data, axis=-1) if train_data.ndim < 4 else train_data
     test_data = np.expand_dims(test_data, axis=-1) if test_data.ndim < 4 else test_data
     data_shape = train_data.shape[1:]
@@ -35,6 +35,10 @@ def download_data(name_dataset:str, dir_dataset: str) -> tuple[npt.NDArray[np.in
 
 #* Torch Preprocessing Functions
 #*############################################################
+
+def flatten_grads(grads:dict[str:torch.Tensor]):
+    flat_grads = [grad.view(-1) for grad in grads.values()]
+    return torch.cat(flat_grads)
 
 def split_data_by_class_TORCH(dataset: torchvision.datasets.VisionDataset) -> dict[int, torch.Tensor]:
     split_datasets = {}
@@ -147,7 +151,7 @@ def allocate_worker_datasets_TORCH(num_worker: int, allocation_type: str, class_
         case _:
             raise ValueError("Invalid allocation type")
         
-    print(f"The number of dropped samples is equal to {num_dropped_samples}")
+    # print(f"The number of dropped samples is equal to {num_dropped_samples}")
     if allocation_type != "class-workers":
         worker_data, worker_targets = flatten_nested_lists(worker_data), flatten_nested_lists(worker_targets)
     return worker_data, worker_targets
@@ -341,10 +345,10 @@ def generate_worker_epochs(worker_number:int, RNG: np.random.Generator, max_iter
             #done with this case
         case _:
             raise ValueError("Invalid iteration type")
-    print(f"The local iteration distribution is {local_iteration_distribution.shape} shaped")
+    # print(f"The local iteration distribution is {local_iteration_distribution.shape} shaped")
     if local_iteration_distribution.ndim == 1:
         local_iteration_distribution = np.repeat(local_iteration_distribution.reshape(-1, worker_number), max_iteration, axis=0)
-    print(f"The local iteration distribution is expanded to {local_iteration_distribution.shape}")
+    # print(f"The local iteration distribution is expanded to {local_iteration_distribution.shape}")
     return np.int16(local_iteration_distribution)
 
 def generate_active_worker_matrix(inactive_probability: float, RNG: np.random.Generator, max_iteration: int, worker_number: int):
@@ -354,6 +358,13 @@ def generate_active_worker_matrix(inactive_probability: float, RNG: np.random.Ge
 
 #* Utility Functions
 #*############################################################
+
+def distance_based_diagnostic(theta_0: int, theta_n: int, theta_nq: int, n: int, q: int, k0: int, thresh: int):
+    if n == q**(int(n // q) + 1) and (n // q) >= k0:
+        S = (np.log(np.linalg.norm(theta_n - theta_0)**2) - np.log(np.linalg.norm(theta_nq - theta_0)**2)) / (np.log(n) - np.log(n/q))     
+        return S < thresh
+    else:
+        return False
 
 def get_train_transforms(dataset_type:str):
     match dataset_type.casefold():
